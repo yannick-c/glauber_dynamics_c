@@ -1,5 +1,5 @@
-#include <stdlib.h> // malloc
 #include <assert.h>
+#include <stdlib.h> // malloc
 
 #include "weightedgraph.h"
 
@@ -88,9 +88,21 @@ void graph_rm_edge(graph *g, int v1, int v2){
         }
 }
 
-graph *graph_construct_torus(int d, int n, int init_weight){
+int static int_pow(int base, int exponent){
+        int result = 1;
+        while (exponent){
+                if (exponent & 1){
+                        result *= base;
+                }
+                exponent /= 2;
+                base *= base;
+        }
+        return result;
+}
+
+graph *graph_construct_torus(int n, int d, int init_weight){
         graph *out = graph_new();
-        int vertex_count = n^d;
+        int vertex_count = int_pow(n, d);
         graph_add_n_vertices(out, vertex_count);
 
         for (int i=0; i<vertex_count; i++){
@@ -101,7 +113,7 @@ graph *graph_construct_torus(int d, int n, int init_weight){
                         /* connect it to the next vertex in the next
                          * dimensions, i.e. in 2 dimensions the lower one and
                          * take care of the periodic boundary conditions. */
-                        connect_to = (i + (n^j)) % n^(j+1);
+                        connect_to = (i + (int_pow(n,j))) % int_pow(n,j+1);
                         graph_add_edge(out, i, connect_to, init_weight);
                 }
         }

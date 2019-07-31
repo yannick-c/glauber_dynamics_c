@@ -35,4 +35,4 @@ void graph_add_edge(graph *g, int v1, int v2, int weight);
 void graph_rm_edge(graph *g, int v1, int v2);
 
 /* construct a d-dimensional corresponding to \Z^d \setminus n\Z */
-graph *graph_construct_torus(int d, int n, int init_weight);
+graph *graph_construct_torus(int n, int d, int init_weight);
