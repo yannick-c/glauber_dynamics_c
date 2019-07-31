@@ -33,3 +33,6 @@ void graph_add_edge(graph *g, int v1, int v2, int weight);
 
 /* remove an edge between two vertices if it exists */
 void graph_rm_edge(graph *g, int v1, int v2);
+
+/* construct a d-dimensional corresponding to \Z^d \setminus n\Z */
+graph *graph_construct_torus(int d, int n, int init_weight);

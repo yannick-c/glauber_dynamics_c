@@ -1,4 +1,5 @@
 #include <stdlib.h> // malloc
+#include <assert.h>
 
 #include "weightedgraph.h"
 
@@ -36,7 +37,11 @@ void graph_add_n_vertices(graph *g, int to_add){
 }
 
 void graph_add_edge(graph *g, int v1, int v2, int weight){
-        /* check first that the connection does not exist */
+        /* check that the vertices are possible for the graph */
+        assert(v1 < g->n);
+        assert(v2 < g->n);
+
+        /* check that the connection does not exist */
         for (int i=0; i<g->vertices[v1]->dim; i++){
                 if (g->vertices[v1]->edges[i]->v1 == v2 ||
                     g->vertices[v1]->edges[i]->v2 == v2){
@@ -81,4 +86,24 @@ void graph_rm_edge(graph *g, int v1, int v2){
                 vertex_rm_edge_from_neighbourhood(g->vertices[v1], connecting_edge);
                 vertex_rm_edge_from_neighbourhood(g->vertices[v2], connecting_edge);
         }
+}
+
+graph *graph_construct_torus(int d, int n, int init_weight){
+        graph *out = graph_new();
+        int vertex_count = n^d;
+        graph_add_n_vertices(out, vertex_count);
+
+        for (int i=0; i<vertex_count; i++){
+                /* connect to the right vertex of the i-th one */
+                int connect_to = (i+1) % n;
+                graph_add_edge(out, i, connect_to, init_weight);
+                for (int j=0; j<d; j++){
+                        /* connect it to the next vertex in the next
+                         * dimensions, i.e. in 2 dimensions the lower one and
+                         * take care of the periodic boundary conditions. */
+                        connect_to = (i + (n^j)) % n^(j+1);
+                        graph_add_edge(out, i, connect_to, init_weight);
+                }
+        }
+        return out;
 }
