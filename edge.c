@@ -7,4 +7,6 @@ edge *edge_new(int v1, int v2, int weight){
         return out;
 }
 
-void edge_free(edge *e){ free(e); }
+void edge_free(edge *e){
+        free(e);
+}

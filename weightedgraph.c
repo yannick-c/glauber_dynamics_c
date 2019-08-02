@@ -88,6 +88,8 @@ void graph_rm_edge(graph *g, int v1, int v2){
         }
 }
 
+/* write a pow function for integers since the math.h pow uses exp(log(x))
+ * which is not the most precise way of calculating it for integers. */
 int static int_pow(int base, int exponent){
         int result = 1;
         while (exponent){

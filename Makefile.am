@@ -4,4 +4,5 @@ main_SOURCES=main.c weightedgraph.c vertex.c edge.c
 
 TESTS=$(check_PROGRAMS)                               
 check_PROGRAMS=test_vertex
-test_vertex_source=test_vertex.c vertex.c edge.c
+test_vertex_SOURCES=test_vertex.c vertex.c edge.c
+test_vertex_LDFLAGS=`pkg-config --libs glib-2.0`

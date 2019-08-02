@@ -1,4 +1,5 @@
 #include <glib.h>
+#include <stdio.h>
 
 #include "vertex.h"
 
@@ -9,18 +10,34 @@ typedef struct {
 
 void vertex_setup(vfixture *vf, gconstpointer test_data){
         vf->v = vertex_new();
-        *vf->v = (vertex){.dim=1, .local_weight=1};
+        *vf->v = (vertex){.dim=1, .local_weight=2}; /* local weight of vf->e1 defined 2 lines down */
         /* add an edge from the start */
-        vf->e1 = edge_new(0,0,2); /* use non trivial weights */
+        vf->e1 = edge_new(0,1,2); /* use non trivial weights */
+                                  /* v1 and v2 are different since edge.c and
+                                   * vertex.c check for non-existence of
+                                   * self-edges, the values have no meaning */
         vf->v->edges=realloc(vf->v->edges, sizeof(edge*));
         vf->v->edges[0]=vf->e1;
-        vf->e2 = edge_new(0,0,3);
+        vf->e2 = edge_new(0,1,3);
 }
 
+/* quick for loop to avoid double freeing edges */
+int static vertex_contains_edge(vertex *v, edge *e){
+        for (int i=0; i<v->dim; i++){
+                if (v->edges[i] == e){
+                        return 1;
+                }
+        }
+        return 0;
+}
 void vertex_teardown(vfixture *vf, gconstpointer test_data){
         vertex_free(vf->v);
-        if(vf->e1){ edge_free(vf->e1); }
-        if(vf->e2){ edge_free(vf->e2); }
+        if(!vertex_contains_edge(vf->v, vf->e1)){
+                edge_free(vf->e1);
+        }
+        if(!vertex_contains_edge(vf->v, vf->e2)){
+                edge_free(vf->e2);
+        }
 }
 
 void test_add_good_edge(vfixture *vf, gconstpointer ignored){
