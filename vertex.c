@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdlib.h> // malloc
 
 #include "vertex.h"
@@ -17,6 +18,9 @@ void vertex_free(vertex *v){
 }
 
 void vertex_add_edge_to_neighbourhood(vertex *v, edge *e){
+        /* check that we are not trying to add a self-edge */
+        assert(e->v1 != e->v2);        
+
         /* check that the edge is not already contained */
         for(int i=0; i<v->dim; i++){
                 if (v->edges[i] == e){
