@@ -17,3 +17,5 @@ main
 missing
 stamp-h1
 weighted_graphs/
+test*
+!test*.c

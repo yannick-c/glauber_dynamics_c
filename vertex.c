@@ -1,4 +1,4 @@
-#include <assert.h>
+#include <glib.h>
 #include <stdlib.h> // malloc
 
 #include "vertex.h"
@@ -18,8 +18,11 @@ void vertex_free(vertex *v){
 }
 
 void vertex_add_edge_to_neighbourhood(vertex *v, edge *e){
-        /* check that we are not trying to add a self-edge */
-        assert(e->v1 != e->v2);        
+        /* check that we are not trying to add a self-edge
+         *
+         * NOTE: This does not check for different edges connecting the same
+         * vertices (should not happen when used with weightedgraphs). */
+        g_assert(e->v1 != e->v2);        
 
         /* check that the edge is not already contained */
         for(int i=0; i<v->dim; i++){
@@ -34,7 +37,7 @@ void vertex_add_edge_to_neighbourhood(vertex *v, edge *e){
 }
 
 /**
- * make a new edges for the incoming vertex removing the i-th edge
+ * make a new edges-array for the incoming vertex removing the i-th edge
  * 
  * Note that this is a pure utility function (hence static, i.e. limited to the
  * file) for vertex_rm_edge_from_neighbourhood.
@@ -55,6 +58,7 @@ void vertex_rm_edge_from_neighbourhood(vertex *v, edge *e){
                 /* compare memory adresses */
                 if(v->edges[i] == e){
                         v->edges = rm_i_th_edge(v, i);
+                        v->dim--;
                         v->local_weight -= e->weight;
                         return;
                 }
