@@ -1,9 +1,9 @@
 # uncomment last parts for test coverage reports
 AM_CFLAGS=-Ipcg-c/include -Ipcg-c/extras `pkg-config --libs glib-2.0` `pkg-config --cflags glib-2.0` -g -O0 -Wall # -fprofile-arcs -ftest-coverage
 AM_LDFLAGS= -Lpcg-c/src/libpcg_random
-bin_PROGRAMS=glauber_evolution
-glauber_evolution_SOURCES=glauber_evolution.c weightedgraph.c vertex.c edge.c pcg-c/extras/entropy.c
-glauber_evolution_LDADD= ./pcg-c/src/libpcg_random.a
+bin_PROGRAMS=glauber_dynamics
+glauber_dynamics_SOURCES=glauber_dynamics.c weightedgraph.c vertex.c edge.c pcg-c/extras/entropy.c
+glauber_dynamics_LDADD= ./pcg-c/src/libpcg_random.a
 
 TESTS=$(check_PROGRAMS)                               
 check_PROGRAMS=test_vertex test_weightedgraph
