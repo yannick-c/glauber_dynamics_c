@@ -1,5 +1,5 @@
 #include <glib.h>
-#include <stdio.h>
+#include <stdlib.h>
 
 #include "vertex.h"
 
@@ -31,6 +31,7 @@ int static vertex_contains_edge(vertex *v, edge *e){
         }
         return 0;
 }
+
 void vertex_teardown(vfixture *vf, gconstpointer test_data){
         if(!vertex_contains_edge(vf->v, vf->e1)){
                 edge_free(vf->e1);
@@ -41,8 +42,8 @@ void vertex_teardown(vfixture *vf, gconstpointer test_data){
         vertex_free(vf->v);
 }
 
+/* add e2 to v and check that all the values are correctly adapted */
 void test_add_good_edge(vfixture *vf, gconstpointer ignored){
-        /* add e2 to v and check that all the values are correctly adapted */
         vertex_add_edge_to_neighbourhood(vf->v, vf->e2);
         g_assert_cmpint(vf->v->dim, ==, 2);
         g_assert_cmpint(vf->v->local_weight, ==, vf->e1->weight+vf->e2->weight);
@@ -50,9 +51,9 @@ void test_add_good_edge(vfixture *vf, gconstpointer ignored){
         g_assert_true(vf->v->edges[1] == vf->e2); /* compare pointers */
 }
 
+/* add e1 again and check that this does not change the dimension
+ * Note that this is not supposed to give errors */
 void test_add_double_edge(vfixture *vf, gconstpointer ignored){
-        /* add e1 again and check that this does not change the dimension
-         * Note that this is not supposed to give errors */
         vertex_add_edge_to_neighbourhood(vf->v, vf->e1);
         g_assert_cmpint(vf->v->dim, ==, 1);
         g_assert_cmpint(vf->v->local_weight, ==, vf->e1->weight);
@@ -61,11 +62,10 @@ void test_add_double_edge(vfixture *vf, gconstpointer ignored){
                                                       most likely not equal to e1 */
 }
 
+/* edit e2 in a way that it becomes a self-edge and check that trying
+ * to add that gives an assertion error since this should never be
+ * allowed. */
 void test_add_self_edge(vfixture *vf, gconstpointer ignored){
-        /* edit e2 in a way that it becomes a self-edge and check that trying
-         * to add that gives an assertion error since this should never be
-         * allowed. */
-
         /* read the manual for subprocess and this particular recipe */
          if (g_test_subprocess()){
              vf->e2->v2 = vf->e2->v1;
@@ -75,25 +75,24 @@ void test_add_self_edge(vfixture *vf, gconstpointer ignored){
          g_test_trap_assert_failed();
 }
 
+/* remove e1 and check that the vertex is empty after that */
 void test_remove_edge(vfixture *vf, gconstpointer ignored){
-        /* remove e1 and check that the vertex is empty after that */
         vertex_rm_edge_from_neighbourhood(vf->v, vf->e1);
         g_assert_cmpint(vf->v->dim, ==, 0);
         g_assert_cmpint(vf->v->local_weight, ==, 0);
         g_assert_false(vf->v->edges[0] == vf->e1); /* vf->v->edges[0] should be invalid */
 }
 
+/* the large case needed to executed the insides of the for-loop in
+ * rm_i_th_edge */
 void test_remove_edge_large(vfixture *vf, gconstpointer ignored){
-        /* this is needed to executed the insides of the for-loop in
-         * rm_i_th_edge */
-
         /* add_edge has been tested above, so can safely be used */
         vertex_add_edge_to_neighbourhood(vf->v, vf->e2);
         vertex_add_edge_to_neighbourhood(vf->v, vf->e3);
         vertex_rm_edge_from_neighbourhood(vf->v, vf->e2);
         g_assert_cmpint(vf->v->dim, ==, 2);
         g_assert_cmpint(vf->v->local_weight, ==, vf->e1->weight + vf->e3->weight);
-        g_assert_true(vf->v->edges[1] == vf->e3); /* vf->v->edges[0] should be invalid */
+        g_assert_true(vf->v->edges[1] == vf->e3); /* vf->v->edges[1] should be invalid */
 }
 
 void test_remove_nonexistent_edge(vfixture *vf, gconstpointer ignored){
@@ -102,8 +101,8 @@ void test_remove_nonexistent_edge(vfixture *vf, gconstpointer ignored){
         g_assert_cmpint(vf->v->dim, ==, 1);
         g_assert_cmpint(vf->v->local_weight, ==, vf->e1->weight);
         g_assert_true(vf->v->edges[0] == vf->e1);
-        g_assert_false(vf->v->edges[1] == vf->e1); /* vf->v->edges[0] should be invalid */
-        g_assert_false(vf->v->edges[1] == vf->e2); /* vf->v->edges[0] should be invalid */
+        g_assert_false(vf->v->edges[1] == vf->e1); /* vf->v->edges[1] should be invalid */
+        g_assert_false(vf->v->edges[1] == vf->e2); /* vf->v->edges[1] should be invalid */
 }
         
 int main(int argc, char **argv){

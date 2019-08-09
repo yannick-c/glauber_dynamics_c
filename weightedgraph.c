@@ -1,4 +1,4 @@
-#include <assert.h>
+#include <glib.h>
 #include <stdlib.h> // malloc
 
 #include "weightedgraph.h"
@@ -7,7 +7,7 @@
  * Basic undirected graph struct implementation with edge weights using
  * adjacency lists represented as  variable length arrays.
  *
- * The arrays are not sorted!
+ * No order is imposed on the adjacency lists!
  **/
 
 graph *graph_new(){
@@ -18,12 +18,27 @@ graph *graph_new(){
 
 void graph_free(graph *g){
         for(int i=0; i<g->n; i++){
+                vertex *v = g->vertices[i];
                 /**
                  * use the fact that vertex_free frees the memory location for all
-                 * edges contained in it
+                 * edges contained in it so remove the edge from the other
+                 * vertex.
                  **/
+                for (int j=0; j<v->dim; j++){
+                        edge *e = v->edges[j];
+                        int to_cleanse = e->v1;
+                        if (e->v2 != i){
+                                /* if v2 is the vertex that is not i then v1==i
+                                 * and we have to remove the edge from v2 not
+                                 * from v1 */
+                                to_cleanse = e->v2;
+                        }
+                        vertex_rm_edge_from_neighbourhood(g->vertices[to_cleanse], e);
+                }
                 vertex_free(g->vertices[i]);
         }
+        free(g->vertices);
+        free(g->edges);
         free(g);
 }
 
@@ -38,8 +53,8 @@ void graph_add_n_vertices(graph *g, int to_add){
 
 void graph_add_edge(graph *g, int v1, int v2, int weight){
         /* check that the vertices are possible for the graph */
-        assert(v1 < g->n);
-        assert(v2 < g->n);
+        g_assert(v1 < g->n);
+        g_assert(v2 < g->n);
 
         /* check that the connection does not exist */
         for (int i=0; i<g->vertices[v1]->dim; i++){
@@ -47,16 +62,16 @@ void graph_add_edge(graph *g, int v1, int v2, int weight){
                     g->vertices[v1]->edges[i]->v2 == v2){
                         return;
                 }
+        }
 
         /* update g->m only at the end and use that it contains the old value */
-        g->edges = realloc(g->edges, sizeof(g->edges) + sizeof(edge));
+        g->edges = realloc(g->edges, (g->m+1) * sizeof(edge*));
         edge *new_edge = edge_new(v1, v2, weight);
         g->edges[g->m] = new_edge;
 
         vertex_add_edge_to_neighbourhood(g->vertices[v1], new_edge);
         vertex_add_edge_to_neighbourhood(g->vertices[v2], new_edge);
-        g->m += 1;
-        }
+        g->m++;
 }
 
 /**
@@ -64,7 +79,7 @@ void graph_add_edge(graph *g, int v1, int v2, int weight){
  *
  * Returns NULL pointer if no edge present.
  **/
-edge static *find_connecting_edge(vertex *v, int dst){
+edge *graph_find_connecting_edge(vertex *v, int dst){
         for (int i=0; i<v->dim; i++){
                 if (v->edges[i]->v1 == dst ||
                     v->edges[i]->v2 == dst){
@@ -75,16 +90,22 @@ edge static *find_connecting_edge(vertex *v, int dst){
 }
 
 void graph_rm_edge(graph *g, int v1, int v2){
+        /* check that the vertices are possible for the graph */
+        g_assert(v1 < g->n);
+        g_assert(v2 < g->n);
+
         /**
          * Since we need the correct memory location we cannot just create a
          * new edge instance, but need to loop through the edges and find the
          * actual edge.
          **/
-        edge *connecting_edge = find_connecting_edge(g->vertices[v1], v2); 
+        edge *connecting_edge = graph_find_connecting_edge(g->vertices[v1], v2); 
         if (connecting_edge){
                 /* only if the connecting edge is not NULL */
                 vertex_rm_edge_from_neighbourhood(g->vertices[v1], connecting_edge);
                 vertex_rm_edge_from_neighbourhood(g->vertices[v2], connecting_edge);
+                free(connecting_edge);
+                g->m--;
         }
 }
 
@@ -108,14 +129,15 @@ graph *graph_construct_torus(int n, int d, int init_weight){
         graph_add_n_vertices(out, vertex_count);
 
         for (int i=0; i<vertex_count; i++){
-                /* connect to the right vertex of the i-th one */
-                int connect_to = (i+1) % n;
-                graph_add_edge(out, i, connect_to, init_weight);
                 for (int j=0; j<d; j++){
-                        /* connect it to the next vertex in the next
+                        /* the offset ensures that we dont modulo down to the
+                         * first cases all the time but only close the
+                         * boundaries */
+                        int offset = i - (i % int_pow(n,j+1));
+                        /* connect it to  the next vertex in the next
                          * dimensions, i.e. in 2 dimensions the lower one and
-                         * take care of the periodic boundary conditions. */
-                        connect_to = (i + (int_pow(n,j))) % int_pow(n,j+1);
+                         * the right one take care of the periodic boundary conditions. */
+                        int connect_to = (i + (int_pow(n,j))) % int_pow(n,j+1) + offset; 
                         graph_add_edge(out, i, connect_to, init_weight);
                 }
         }

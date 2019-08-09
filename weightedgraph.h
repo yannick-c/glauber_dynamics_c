@@ -34,5 +34,8 @@ void graph_add_edge(graph *g, int v1, int v2, int weight);
 /* remove an edge between two vertices if it exists */
 void graph_rm_edge(graph *g, int v1, int v2);
 
+/* return the edge connecting vertex v to vertex of index dst */
+edge *graph_find_connecting_edge(vertex *v, int dst);
+
 /* construct a d-dimensional corresponding to \Z^d \setminus n\Z */
 graph *graph_construct_torus(int n, int d, int init_weight);
