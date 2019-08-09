@@ -1,0 +1,8 @@
+1. Download and install the PCG Random Number Generator (see for example http://www.pcg-random.org/using-pcg-c.html or https://github.com/imneme/pcg-c).
+2. Add
+```
+install extras/entropy.c $(PREFIX)/lib
+install -m 0644 extras/entropy.h $(PREFIX)/include
+```
+to the Makefile in that repository.
+3. do make && sudo make install.

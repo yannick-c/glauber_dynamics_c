@@ -19,3 +19,4 @@ stamp-h1
 weighted_graphs/
 test*
 !test*.c
+pcg-c

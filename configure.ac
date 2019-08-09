@@ -8,7 +8,7 @@ AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
 AC_PROG_CXX
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 CFLAGS+=" -std=c11"
 AC_PROG_AWK
 AC_PROG_CC
