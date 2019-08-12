@@ -39,3 +39,5 @@ edge *graph_find_connecting_edge(vertex *v, int dst);
 
 /* construct a d-dimensional corresponding to \Z^d \setminus n\Z */
 graph *graph_construct_torus(int n, int d, int init_weight);
+
+void draw_torus(graph *draw_torus, int n, int d);

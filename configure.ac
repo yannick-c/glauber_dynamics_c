@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([simulatePPP], [0.1], [yannick.couzinie@uniroma3.it])
+AC_INIT([simulatePPP], [0.9], [yannick.couzinie@uniroma3.it])
 AC_CONFIG_SRCDIR([vertex.c])
 AC_CONFIG_HEADERS([config.h])
 

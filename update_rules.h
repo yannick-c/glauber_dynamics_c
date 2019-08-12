@@ -11,4 +11,6 @@
  * it is needed.
  **/
 
-void polya_update(graph *state, int vertex_index, pcg32_random_t *rng);
+typedef void (*update_rule)(graph*, int, pcg32_random_t*);
+
+update_rule polya_update;

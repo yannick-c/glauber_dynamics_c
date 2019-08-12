@@ -1,4 +1,10 @@
+#define _GNU_SOURCE //cause stdio.h to include asprintf
+
+#define MAX_PENWIDTH 1
+#define DECREASE_RATE 10 // exponent by which pendwidth decreases with edge weight
 #include <glib.h>
+#include <math.h>
+#include <stdio.h>
 #include <stdlib.h> // malloc
 
 #include "weightedgraph.h"
@@ -142,4 +148,79 @@ graph *graph_construct_torus(int n, int d, int init_weight){
                 }
         }
         return out;
+}
+
+/* print a dot graph file (see graphviz) to stdout such that it can be piped
+ * into the dot command the input has to be the output of graph_construct_torus
+ * with the same inputs n and d.*/
+void draw_torus(graph *draw_torus, int n, int d){
+        /* only d==2 printing case has been handled */
+        g_assert(d==2);
+        /* calculate the max weight first */
+        double max_weight=0;
+        for (int i=0; i<draw_torus->m; i++){
+                max_weight = fmax(max_weight, draw_torus->edges[i]->weight);
+        }
+
+        printf("graph {\n");
+        printf("node [shape=point, style=dot, width=.1, height=.1, label=None];\n");
+        printf("rankdir=LR;\n");
+        /* find all the horizontal vertices that are invisible and serve as
+         * docking points for edges to 'loop' around to the other end (i.e.
+         * open edges) */
+        for (int i=0; i<n; i++){
+                printf("H%i [style=invis];\n", n*i); /* analogously for horizontal connections */
+                printf("H%i [style=invis];\n", n*i+(n-1));
+        }
+
+        for (int i=0; i<n; i++){
+                printf("V%i [style=invis];\n", i); /* first line needs vertical connections to the top */
+                printf("V%i [style=invis];\n", i+int_pow(n, d)-n); /* and last line */
+        }
+
+        /* Do the horizontal connections */ 
+        for (int i=0; i < n; i++){
+
+                edge *looping_edge = graph_find_connecting_edge(draw_torus->vertices[n*i], n*i+n-1);
+                double looping_weight_ratio=MAX_PENWIDTH*pow(looping_edge->weight/max_weight, DECREASE_RATE);
+                printf("H%i -- %i[penwidth=%f];\n", n*i, n*i, looping_weight_ratio);
+
+                for (int j=1; j < n; j++){
+                        int cur_vertex_index = n*i+j;
+
+                        edge *connecting_edge = graph_find_connecting_edge(draw_torus->vertices[cur_vertex_index-1],
+                                                                           cur_vertex_index);
+                        double weight_ratio = MAX_PENWIDTH*pow(connecting_edge->weight/max_weight, DECREASE_RATE);
+
+                        printf("%i -- %i[penwidth=%f];\n", cur_vertex_index-1, cur_vertex_index, weight_ratio);
+                }
+                printf("%i -- H%i[penwidth=%f];\n", n*i+n-1, n*i+n-1, looping_weight_ratio);
+        }
+
+        /* Now do the vertical connections and define their ranks as same */ 
+        for (int i=0; i < n; i++){
+                char *same_rank;
+                asprintf(&same_rank, "V%i, %i", i, i);
+                
+                
+                edge *looping_edge = graph_find_connecting_edge(draw_torus->vertices[i], i+n*(n-1));
+                double looping_weight_ratio=MAX_PENWIDTH*pow(looping_edge->weight/max_weight, DECREASE_RATE);
+                printf("V%i -- %i[penwidth=%f];\n", i, i, looping_weight_ratio);
+
+                for (int j=1; j < n; j++){
+                        int prev_vertex_index=i+n*(j-1);
+                        int cur_vertex_index=i+n*j;
+
+                        edge *connecting_edge = graph_find_connecting_edge(draw_torus->vertices[prev_vertex_index],
+                                                                           cur_vertex_index);
+                        double weight_ratio = MAX_PENWIDTH*pow(connecting_edge->weight/max_weight, DECREASE_RATE);
+
+                        printf("%i -- %i[penwidth=%f];\n", prev_vertex_index, cur_vertex_index, weight_ratio);
+                        asprintf(&same_rank, "%s, %i", same_rank, cur_vertex_index);
+                }
+                printf("%i -- V%i[penwidth=%f];\n", i+n*(n-1), i+n*(n-1), looping_weight_ratio);
+                asprintf(&same_rank, "%s, %i, V%i", same_rank, i+n*(n-1), i+n*(n-1));
+                printf("{ rank=same; %s};\n", same_rank);
+        }
+        printf("}");
 }

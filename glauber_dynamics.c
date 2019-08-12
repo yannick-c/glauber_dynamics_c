@@ -37,7 +37,7 @@ static double exponential_rand(double lambda_rate){
  * as the first and only function of this file.
  */
 void glauber_dynamics(graph *init_state,
-                      void (*graph_update)(graph*, int, pcg32_random_t*),
+                      update_rule graph_update,
                       int threshold_time){
         double t = 0; /* time parameter */
 
@@ -54,13 +54,19 @@ void glauber_dynamics(graph *init_state,
         while (t < threshold_time){
                 t += exponential_rand((double) init_state->n);
 
-                /* it generates strictly smaller than bound so add 1 */
+                /* it generates strictly smaller than bound so init_state->n is
+                 * fine. */
                 int chosen_vertex_index = pcg32_boundedrand_r(&uniform_rng,
-                                                              init_state->n+1);
+                                                              init_state->n);
 
-                /* use the passed graph_update rule to update the graph state
-                 * */
+                /* use the passed graph_update rule to update the graph state */
                 graph_update(init_state, chosen_vertex_index, &update_rng);
         }
 
+}
+
+int main(){
+        graph *torus = graph_construct_torus(100, 2, 1);
+        glauber_dynamics(torus, polya_update, 1000000);
+        draw_torus(torus, 4, 2);
 }
