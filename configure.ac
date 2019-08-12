@@ -22,7 +22,7 @@ AC_PROG_RANLIB
 AC_CHECK_LIB([glib-2.0])
 
 # Checks for header files.
-AC_CHECK_HEADERS([stdlib.h])
+AC_CHECK_HEADERS([stdlib.h], [math.h], [stdio.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 

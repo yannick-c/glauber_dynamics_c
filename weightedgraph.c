@@ -200,6 +200,7 @@ void draw_torus(graph *draw_torus, int n, int d){
         /* Now do the vertical connections and define their ranks as same */ 
         for (int i=0; i < n; i++){
                 char *same_rank;
+                char *same_rank_tmp; // placeholder for same_rank to free same_rank pointer
                 asprintf(&same_rank, "V%i, %i", i, i);
                 
                 
@@ -216,11 +217,15 @@ void draw_torus(graph *draw_torus, int n, int d){
                         double weight_ratio = MAX_PENWIDTH*pow(connecting_edge->weight/max_weight, DECREASE_RATE);
 
                         printf("%i -- %i[penwidth=%f];\n", prev_vertex_index, cur_vertex_index, weight_ratio);
-                        asprintf(&same_rank, "%s, %i", same_rank, cur_vertex_index);
+                        asprintf(&same_rank_tmp, "%s, %i", same_rank, cur_vertex_index);
+                        free(same_rank);
+                        same_rank=same_rank_tmp;
                 }
                 printf("%i -- V%i[penwidth=%f];\n", i+n*(n-1), i+n*(n-1), looping_weight_ratio);
-                asprintf(&same_rank, "%s, %i, V%i", same_rank, i+n*(n-1), i+n*(n-1));
-                printf("{ rank=same; %s};\n", same_rank);
+                asprintf(&same_rank_tmp, "%s, %i, V%i", same_rank, i+n*(n-1), i+n*(n-1));
+                printf("{ rank=same; %s};\n", same_rank_tmp);
+                free(same_rank);
+                free(same_rank_tmp);
         }
         printf("}");
 }
