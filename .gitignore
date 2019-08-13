@@ -7,7 +7,7 @@ COPYING
 INSTALL
 install-sh
 configure
-/**/.libs/
+/**/.libs/*
 libtool
 ltmain.sh
 /**/Makefile.in
@@ -29,3 +29,7 @@ stamp-h1
 /**/*.la
 /**/*.o
 /**/*.lo
+/**/*.trs
+/**/test/
+!/**/test/*.c
+/**/.dirstamp

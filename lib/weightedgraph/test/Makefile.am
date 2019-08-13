@@ -4,5 +4,5 @@ AM_LDFLAGS=-lm # include math with -lm
 
 TESTS=$(check_PROGRAMS)                               
 check_PROGRAMS=test_vertex test_weightedgraph
-test_vertex_SOURCES=test_vertex.c vertex.c edge.c
-test_weightedgraph_SOURCES=test_weightedgraph.c weightedgraph.c vertex.c edge.c
+test_vertex_SOURCES=test_vertex.c ../src/vertex.c ../src/edge.c
+test_weightedgraph_LDADD=../src/libweightedgraph.la
