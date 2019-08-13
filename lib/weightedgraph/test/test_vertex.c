@@ -1,7 +1,7 @@
 #include <glib.h>
 #include <stdlib.h>
 
-#include "vertex.h"
+#include "../src/vertex.h"
 
 typedef struct {
         vertex *v;

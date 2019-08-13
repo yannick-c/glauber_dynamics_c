@@ -2,8 +2,8 @@
 #include <math.h>
 
 /* random number generator implementation */
-#include "pcg-c/include/pcg_variants.h"
-#include "pcg-c/extras/entropy.h"
+#include "pcg_variants.h"
+#include "entropy.h"
 
 #include "glauber_dynamics.h"
 

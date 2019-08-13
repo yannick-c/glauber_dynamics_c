@@ -1,4 +1,4 @@
-#include "pcg-c/include/pcg_variants.h"
+#include "pcg_variants.h"
 #include "weightedgraph.h"
 
 /**
