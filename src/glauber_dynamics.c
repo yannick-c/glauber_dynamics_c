@@ -67,7 +67,7 @@ void glauber_dynamics(graph *init_state,
 
 int main(){
         graph *torus = graph_construct_torus(2, 2, 1);
-        glauber_dynamics(torus, polya_update, 10);
+        glauber_dynamics(torus, polya_update, 100);
         draw_torus(torus, 2, 2);
         graph_free(torus);
 }

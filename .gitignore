@@ -22,9 +22,11 @@ ltmain.sh
 /**/missing
 stamp-h1
 /**/pcg-c
+test-driver
 
 # ignore any auxiliary compiled files
-/src/glauber_dynamics
+glauber_dynamics
+lib/weightedgraph/libweightedgraph.a
 /**/*.a
 /**/*.la
 /**/*.o

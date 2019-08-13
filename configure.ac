@@ -41,10 +41,5 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([pow log ldexp pcg32_srandom_r pcg32_boundedrand_r pcg32_random_r])
 
-AC_CONFIG_FILES([Makefile
-                 lib/Makefile
-                 lib/weightedgraph/Makefile
-                 lib/weightedgraph/src/Makefile
-                 lib/weightedgraph/test/Makefile
-                 src/Makefile])
+AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

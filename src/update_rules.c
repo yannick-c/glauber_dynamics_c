@@ -3,7 +3,7 @@
 
 #include "update_rules.h"
 
-/* See paper Y. Couzinie and Christian Hirsch */
+/* See paper Yannick Couzinie and Christian Hirsch */
 #define ALPHA 0.5
 void static polya_update_func(graph *state,
                               int vertex_index,

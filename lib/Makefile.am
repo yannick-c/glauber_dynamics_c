@@ -1,1 +1,0 @@
-SUBDIRS = pcg-c weightedgraph .
