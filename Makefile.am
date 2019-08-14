@@ -1,7 +1,7 @@
 ### GENERAL FLAGS
-AM_CFLAGS=-I./include -I$(PCG_DIR)/include -I$(PCG_DIR)/extras -I$(WEIGHTEDGRAPH_DIR)/include `pkg-config --libs glib-2.0` `pkg-config --cflags glib-2.0` -g -O0 -Wall # -fprofile-arcs -ftest-coverage
+AM_CFLAGS=-I./include -I$(PCG_DIR)/include -I$(PCG_DIR)/extras -I$(WEIGHTEDGRAPH_DIR)/include `pkg-config --cflags glib-2.0 libgvc` -g -O0 -Wall # -fprofile-arcs -ftest-coverage
 ACLOCAL_AMFLAGS = '-I m4'
-AM_LDFLAGS=-lm # include math with -lm
+AM_LDFLAGS=-lm `pkg-config --libs glib-2.0 libgvc` # include math with -lm
 
 ### START WEIGHTEDGRAPHS LIB
 lib_LIBRARIES=lib/weightedgraph/libweightedgraph.a

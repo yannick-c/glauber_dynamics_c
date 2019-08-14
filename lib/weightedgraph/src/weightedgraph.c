@@ -1,8 +1,10 @@
 #define _GNU_SOURCE //cause stdio.h to include asprintf
 
 #define MAX_PENWIDTH 1
-#define DECREASE_RATE 10 // exponent by which pendwidth decreases with edge weight
+#define DECREASE_RATE 10 // exponent by which penwidth decreases with edge weight
+
 #include <glib.h>
+#include <gvc.h> //graphviz
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h> // malloc
@@ -153,10 +155,22 @@ graph *graph_construct_torus(int n, int d, int init_weight){
         return out;
 }
 
-/* print a dot graph file (see graphviz) to stdout such that it can be piped
- * into the dot command the input has to be the output of graph_construct_torus
- * with the same inputs n and d.*/
-void draw_torus(graph *draw_torus, int n, int d){
+/* This macro ensures that the string that was extended is freed and returns an
+ * extended string. The inputs are the previous string as previous_str and
+ * variable amounts of printf-like arguments
+ * NOTE: main_string_containing_percents has to contain %s (basically where to
+ * insert the original string, for usual concatenation put at beginning, has to
+ * be the first % argument in any case).
+ * NOTE: Use ##__VAR_ARGS__ to not include the comma if there are no
+ * __VA_ARGS__ given, see gcc docs on variadic macros.*/
+#define ConcatStr(previous_str, main_string_containing_percents, ...){                          \
+        char *tmp=previous_str;                                                                 \
+        asprintf(&previous_str, main_string_containing_percents, previous_str, ##__VA_ARGS__);  \
+        free(tmp);                                                                              \
+}
+
+/* get a png file as string stream */
+void draw_torus2png(graph *draw_torus, int n, int d, char *output_fname){
         /* only d==2 printing case has been handled */
         g_assert(d==2);
         /* calculate the max weight first */
@@ -164,21 +178,22 @@ void draw_torus(graph *draw_torus, int n, int d){
         for (int i=0; i<draw_torus->m; i++){
                 max_weight = fmax(max_weight, draw_torus->edges[i]->weight);
         }
+        char *graph_gv_str; // need to initialize for ConcatStr not to segfault
 
-        printf("graph {\n");
-        printf("node [shape=point, style=dot, width=.1, height=.1, label=None];\n");
-        printf("rankdir=LR;\n");
+        asprintf(&graph_gv_str, "graph {\n");
+        ConcatStr(graph_gv_str, "%snode [shape=point, style=dot, width=.1, height=.1, label=None];\n");
+        ConcatStr(graph_gv_str, "%srankdir=LR;\n");
         /* find all the horizontal vertices that are invisible and serve as
          * docking points for edges to 'loop' around to the other end (i.e.
          * open edges) */
         for (int i=0; i<n; i++){
-                printf("H%i [style=invis];\n", n*i); /* analogously for horizontal connections */
-                printf("H%i [style=invis];\n", n*i+(n-1));
+                ConcatStr(graph_gv_str, "%sH%i [style=invis];\n", n*i); /* analogously for horizontal connections */
+                ConcatStr(graph_gv_str, "%sH%i [style=invis];\n", n*i+(n-1));
         }
 
         for (int i=0; i<n; i++){
-                printf("V%i [style=invis];\n", i); /* first line needs vertical connections to the top */
-                printf("V%i [style=invis];\n", i+int_pow(n, d)-n); /* and last line */
+                ConcatStr(graph_gv_str, "%sV%i [style=invis];\n", i); /* first line needs vertical connections to the top */
+                ConcatStr(graph_gv_str, "%sV%i [style=invis];\n", i+int_pow(n, d)-n); /* and last line */
         }
 
         /* Do the horizontal connections */ 
@@ -186,7 +201,7 @@ void draw_torus(graph *draw_torus, int n, int d){
 
                 edge *looping_edge = graph_find_connecting_edge(draw_torus->vertices[n*i], n*i+n-1);
                 double looping_weight_ratio=MAX_PENWIDTH*pow(looping_edge->weight/max_weight, DECREASE_RATE);
-                printf("H%i -- %i[penwidth=%f];\n", n*i, n*i, looping_weight_ratio);
+                ConcatStr(graph_gv_str, "%sH%i -- %i[penwidth=%f];\n", n*i, n*i, looping_weight_ratio);
 
                 for (int j=1; j < n; j++){
                         int cur_vertex_index = n*i+j;
@@ -195,21 +210,20 @@ void draw_torus(graph *draw_torus, int n, int d){
                                                                            cur_vertex_index);
                         double weight_ratio = MAX_PENWIDTH*pow(connecting_edge->weight/max_weight, DECREASE_RATE);
 
-                        printf("%i -- %i[penwidth=%f];\n", cur_vertex_index-1, cur_vertex_index, weight_ratio);
+                        ConcatStr(graph_gv_str, "%s%i -- %i[penwidth=%f];\n", cur_vertex_index-1, cur_vertex_index, weight_ratio);
                 }
-                printf("%i -- H%i[penwidth=%f];\n", n*i+n-1, n*i+n-1, looping_weight_ratio);
+                ConcatStr(graph_gv_str, "%s%i -- H%i[penwidth=%f];\n", n*i+n-1, n*i+n-1, looping_weight_ratio);
         }
 
         /* Now do the vertical connections and define their ranks as same */ 
         for (int i=0; i < n; i++){
                 char *same_rank;
-                char *same_rank_tmp; // placeholder for same_rank to free same_rank pointer
                 asprintf(&same_rank, "V%i, %i", i, i);
                 
                 
                 edge *looping_edge = graph_find_connecting_edge(draw_torus->vertices[i], i+n*(n-1));
                 double looping_weight_ratio=MAX_PENWIDTH*pow(looping_edge->weight/max_weight, DECREASE_RATE);
-                printf("V%i -- %i[penwidth=%f];\n", i, i, looping_weight_ratio);
+                ConcatStr(graph_gv_str, "%sV%i -- %i[penwidth=%f];\n", i, i, looping_weight_ratio);
 
                 for (int j=1; j < n; j++){
                         int prev_vertex_index=i+n*(j-1);
@@ -219,16 +233,27 @@ void draw_torus(graph *draw_torus, int n, int d){
                                                                            cur_vertex_index);
                         double weight_ratio = MAX_PENWIDTH*pow(connecting_edge->weight/max_weight, DECREASE_RATE);
 
-                        printf("%i -- %i[penwidth=%f];\n", prev_vertex_index, cur_vertex_index, weight_ratio);
-                        asprintf(&same_rank_tmp, "%s, %i", same_rank, cur_vertex_index);
-                        free(same_rank);
-                        same_rank=same_rank_tmp;
+                        ConcatStr(graph_gv_str, "%s%i -- %i[penwidth=%f];\n", prev_vertex_index, cur_vertex_index, weight_ratio);
+                        ConcatStr(same_rank, "%s, %i", cur_vertex_index);
                 }
-                printf("%i -- V%i[penwidth=%f];\n", i+n*(n-1), i+n*(n-1), looping_weight_ratio);
-                asprintf(&same_rank_tmp, "%s, %i, V%i", same_rank, i+n*(n-1), i+n*(n-1));
-                printf("{ rank=same; %s};\n", same_rank_tmp);
+                ConcatStr(graph_gv_str, "%s%i -- V%i[penwidth=%f];\n", i+n*(n-1), i+n*(n-1), looping_weight_ratio);
+                ConcatStr(same_rank, "%s, %i, V%i", i+n*(n-1), i+n*(n-1));
+                ConcatStr(graph_gv_str, "%s{ rank=same; %s};\n", same_rank);
                 free(same_rank);
-                free(same_rank_tmp);
         }
-        printf("}");
+        ConcatStr(graph_gv_str, "%s}");
+        
+        /** BEGIN GRAPHVIZ CONVERSION **/
+        GVC_t *gvc;
+        Agraph_t *g = agmemread(graph_gv_str); /* read the graph from memory */
+        gvc = gvContext();
+        gvLayout(gvc, g, "dot");
+        gvRenderFilename(gvc, g, "png", output_fname);
+        /* this can be used to get png data if we decide to use ffmpeg for the
+         * whole routine at some point */
+        /* char *out; */
+        /* unsigned int *out_length; */
+        /* gvRenderData(gvc, g, "png", &out, out_length); */
+        gvFreeLayout(gvc, g);
+        gvFreeContext(gvc);
 }

@@ -1,5 +1,8 @@
-#include <stdio.h>
+#define _GNU_SOURCE //cause stdio.h to include asprintf
+
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h> // malloc and free for file handling
 
 /* random number generator implementation */
 #include "pcg_variants.h"
@@ -51,8 +54,11 @@ void glauber_dynamics(graph *init_state,
         pcg32_srandom_r(&update_rng, seeds3[0], seeds3[1]);
         /* end RNG initialization */
 
+        FILE *fp=fopen("simulation.cconcat", "w");
+        fprintf(fp, "ffconcat version 1.0\n");
         while (t < threshold_time){
-                t += exponential_rand((double) init_state->n);
+                double cur_time = exponential_rand((double) init_state->n);
+                t += cur_time;
 
                 /* it generates strictly smaller than bound so init_state->n is
                  * fine. */
@@ -61,13 +67,20 @@ void glauber_dynamics(graph *init_state,
 
                 /* use the passed graph_update rule to update the graph state */
                 graph_update(init_state, chosen_vertex_index, &update_rng);
+
+                char *output_fname;
+                asprintf(&output_fname, "outputs/%f.png", t);
+                fprintf(fp, "file %s\nduration %f\n", output_fname, cur_time);
+                draw_torus2png(init_state, 3, 2, output_fname);
+                free(output_fname);
         }
+        fclose(fp);
 
 }
 
 int main(){
-        graph *torus = graph_construct_torus(10, 2, 1);
-        glauber_dynamics(torus, polya_update, 1000000);
-        draw_torus(torus, 10, 2);
+        graph *torus = graph_construct_torus(3, 2, 1);
+        glauber_dynamics(torus, polya_update, 100000);
+        draw_torus2png(init_state, 3, 2, "out.png");
         graph_free(torus);
 }
