@@ -1,5 +1,8 @@
 #define _GNU_SOURCE //cause stdio.h to include asprintf
 
+#define ONE_FRAME_EVERY 10 // Distance between saved images
+#define TIME_CONTRACTION 1000 // a time unit of 1 corresponds to 1/TIME_CONTRACTION seconds
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h> // malloc and free for file handling
@@ -56,6 +59,7 @@ void glauber_dynamics(graph *init_state,
 
         FILE *fp=fopen("simulation.cconcat", "w");
         fprintf(fp, "ffconcat version 1.0\n");
+        int next_frame_in = ONE_FRAME_EVERY;
         while (t < threshold_time){
                 double cur_time = exponential_rand((double) init_state->n);
                 t += cur_time;
@@ -68,11 +72,14 @@ void glauber_dynamics(graph *init_state,
                 /* use the passed graph_update rule to update the graph state */
                 graph_update(init_state, chosen_vertex_index, &update_rng);
 
-                char *output_fname;
-                asprintf(&output_fname, "outputs/%f.png", t);
-                fprintf(fp, "file %s\nduration %f\n", output_fname, cur_time);
-                draw_torus2png(init_state, 3, 2, output_fname);
-                free(output_fname);
+                if (t>next_frame){
+                        char *output_fname;
+                        asprintf(&output_fname, "outputs/%f.png", t);
+                        fprintf(fp, "file %s\nduration %f\n", output_fname, cur_time/TIME_CONTRACTION);
+                        draw_torus2png(init_state, 3, 2, output_fname);
+                        free(output_fname);
+                        next_frame += ONE_FRAME_EVERY;
+                }
         }
         fclose(fp);
 
