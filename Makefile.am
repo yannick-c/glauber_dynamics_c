@@ -16,8 +16,13 @@ glauber_dynamics_LDADD=$(PCG_DIR)/src/libpcg_random.a $(WEIGHTEDGRAPH_DIR)/libwe
 
 ### START TEST
 TESTS=$(check_PROGRAMS)                               
-check_PROGRAMS=lib/weightedgraph/test/test_vertex lib/weightedgraph/test/test_weightedgraph
+check_PROGRAMS=test/test_update_rules lib/weightedgraph/test/test_vertex lib/weightedgraph/test/test_weightedgraph
+
+test_test_update_rules_SOURCES=test/test_update_rules.c src/update_rules.c
+test_test_update_rules_LDADD=$(WEIGHTEDGRAPH_DIR)/libweightedgraph.a
+
 lib_weightedgraph_test_test_vertex_SOURCES=$(WEIGHTEDGRAPH_DIR)/test/test_vertex.c $(WEIGHTEDGRAPH_DIR)/src/vertex.c $(WEIGHTEDGRAPH_DIR)/src/edge.c
+
 lib_weightedgraph_test_test_weightedgraph_SOURCES=$(WEIGHTEDGRAPH_DIR)/test/test_weightedgraph.c
 lib_weightedgraph_test_test_weightedgraph_LDADD=$(WEIGHTEDGRAPH_DIR)/libweightedgraph.a
 ### END TEST

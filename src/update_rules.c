@@ -1,3 +1,4 @@
+#include <glib.h>
 #include <math.h>
 #include <stdlib.h>
 
@@ -5,9 +6,10 @@
 
 /* See paper Yannick Couzinie and Christian Hirsch */
 #define ALPHA 0.5
-void static polya_update_func(graph *state,
-                              int vertex_index,
+void static polya_update_func(graph *state, int vertex_index,
                               pcg32_random_t *rng){
+        g_assert(vertex_index < state->n);
+
         vertex *chosen_vertex = state->vertices[vertex_index];
         /* generate a double (using the recipe in the docs) and choose the edge
          * by adding their weights (starting from the first in state->edges)

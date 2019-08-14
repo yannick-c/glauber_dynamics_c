@@ -32,6 +32,6 @@ lib/weightedgraph/libweightedgraph.a
 /**/*.o
 /**/*.lo
 /**/*.trs
-/**/test/
+/**/test_*
 !/**/test/*.c
 /**/.dirstamp

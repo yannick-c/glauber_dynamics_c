@@ -199,6 +199,7 @@ void test_graph_construct_torus(gfixture *gf, gconstpointer ignored){
         g_assert_true(graph_find_connecting_edge(gf->g->vertices[8], 2));
         g_assert_true(graph_find_connecting_edge(gf->g->vertices[8], 7));
 }
+
 int main(int argc, char **argv){
         g_test_init(&argc, &argv, NULL);
         /* Tests for graph_add_n_vertices */

@@ -130,6 +130,9 @@ int static int_pow(int base, int exponent){
 }
 
 graph *graph_construct_torus(int n, int d, int init_weight){
+        g_assert(n>2); /* if n=2 then you get connections like - 0 - 1 - which
+                         is a double edge so no periodic boundary conditions are possible
+                       */
         graph *out = graph_new();
         int vertex_count = int_pow(n, d);
         graph_add_n_vertices(out, vertex_count);
