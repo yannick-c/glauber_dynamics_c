@@ -59,7 +59,7 @@ void glauber_dynamics(graph *init_state,
 
         FILE *fp=fopen("simulation.cconcat", "w");
         fprintf(fp, "ffconcat version 1.0\n");
-        int next_frame_in = ONE_FRAME_EVERY;
+        double prev_frame = 0; // when the previous frame was drawn
         while (t < threshold_time){
                 double cur_time = exponential_rand((double) init_state->n);
                 t += cur_time;
@@ -72,13 +72,14 @@ void glauber_dynamics(graph *init_state,
                 /* use the passed graph_update rule to update the graph state */
                 graph_update(init_state, chosen_vertex_index, &update_rng);
 
-                if (t>next_frame){
+                if (t-prev_frame>ONE_FRAME_EVERY){
                         char *output_fname;
                         asprintf(&output_fname, "outputs/%f.png", t);
-                        fprintf(fp, "file %s\nduration %f\n", output_fname, cur_time/TIME_CONTRACTION);
-                        draw_torus2png(init_state, 3, 2, output_fname);
+                        fprintf(fp, "file %s\nduration %f\n", output_fname,
+                                (t-prev_frame)/TIME_CONTRACTION);
+                        draw_torus2png(init_state, 10, 2, output_fname);
                         free(output_fname);
-                        next_frame += ONE_FRAME_EVERY;
+                        prev_frame=t;
                 }
         }
         fclose(fp);
@@ -86,8 +87,8 @@ void glauber_dynamics(graph *init_state,
 }
 
 int main(){
-        graph *torus = graph_construct_torus(3, 2, 1);
-        glauber_dynamics(torus, polya_update, 100000);
-        draw_torus2png(init_state, 3, 2, "out.png");
+        graph *torus = graph_construct_torus(10, 2, 1);
+        glauber_dynamics(torus, polya_update, 10000);
+        draw_torus2png(torus, 10, 2, "out.png");
         graph_free(torus);
 }

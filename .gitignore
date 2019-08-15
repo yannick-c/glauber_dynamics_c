@@ -1,5 +1,5 @@
-.deps/
-Makefile
+outputs/*.png
+simulation.cconcat
 
 /**/*.log
 # START autotools ignores
@@ -7,6 +7,8 @@ COPYING
 INSTALL
 install-sh
 configure
+Makefile
+.deps/
 /**/.libs/*
 libtool
 ltmain.sh
