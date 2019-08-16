@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "vertex.h"
 
 /* define the graph structure */
@@ -40,4 +41,6 @@ edge *graph_find_connecting_edge(vertex *v, int dst);
 /* construct a d-dimensional corresponding to \Z^d \setminus n\Z */
 graph *graph_construct_torus(int n, int d, int init_weight);
 
-void draw_torus2png(graph *draw_torus, int n, int d);
+/* draw the torus */
+void draw_torus2png(graph *draw_torus, int n, int d, unsigned int duration,
+                    int max_width, int max_height, int max_dpi, FILE *out_stream);

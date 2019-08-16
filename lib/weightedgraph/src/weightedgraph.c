@@ -1,4 +1,4 @@
-#define _GNU_SOURCE //cause stdio.h to include asprintf
+#define _GNU_SOURCE 1
 
 #define MAX_PENWIDTH 1
 #define DECREASE_RATE 10 // exponent by which penwidth decreases with edge weight
@@ -170,9 +170,15 @@ graph *graph_construct_torus(int n, int d, int init_weight){
 }
 
 /* get a png file as string stream */
-void draw_torus2png(graph *draw_torus, int n, int d, char *output_fname){
+void draw_torus2png(graph *draw_torus, int n, int d, unsigned int duration,
+                    int max_width, int max_height, int max_dpi, FILE *out_stream){
         /* only d==2 printing case has been handled */
         g_assert(d==2);
+
+        /* if no output file has been specified, take stdout */
+        if (out_stream == NULL){
+                out_stream = stdout;
+        }
         /* calculate the max weight first */
         double max_weight=0;
         for (int i=0; i<draw_torus->m; i++){
@@ -181,6 +187,8 @@ void draw_torus2png(graph *draw_torus, int n, int d, char *output_fname){
         char *graph_gv_str; // need to initialize for ConcatStr not to segfault
 
         asprintf(&graph_gv_str, "graph {\n");
+        ConcatStr(graph_gv_str, "%ssize=\"%i,%i\";\ndpi=%i;\n",
+                max_width, max_height, max_dpi);
         ConcatStr(graph_gv_str, "%snode [shape=point, style=dot, width=.1, height=.1, label=None];\n");
         ConcatStr(graph_gv_str, "%srankdir=LR;\n");
         /* find all the horizontal vertices that are invisible and serve as
@@ -231,6 +239,7 @@ void draw_torus2png(graph *draw_torus, int n, int d, char *output_fname){
 
                         edge *connecting_edge = graph_find_connecting_edge(draw_torus->vertices[prev_vertex_index],
                                                                            cur_vertex_index);
+
                         double weight_ratio = MAX_PENWIDTH*pow(connecting_edge->weight/max_weight, DECREASE_RATE);
 
                         ConcatStr(graph_gv_str, "%s%i -- %i[penwidth=%f];\n", prev_vertex_index, cur_vertex_index, weight_ratio);
@@ -247,13 +256,12 @@ void draw_torus2png(graph *draw_torus, int n, int d, char *output_fname){
         GVC_t *gvc;
         Agraph_t *g = agmemread(graph_gv_str); /* read the graph from memory */
         gvc = gvContext();
-        gvLayout(gvc, g, "dot");
-        gvRenderFilename(gvc, g, "png", output_fname);
-        /* this can be used to get png data if we decide to use ffmpeg for the
-         * whole routine at some point */
-        /* char *out; */
-        /* unsigned int *out_length; */
-        /* gvRenderData(gvc, g, "png", &out, out_length); */
+
+        gvLayout(gvc, g, "dot"); /* layout the gv file using dot */
+
+        for (int i=0; i<duration; i++){
+                gvRender(gvc, g, "png", out_stream); /* and convert it to png */
+        }
         gvFreeLayout(gvc, g);
         gvFreeContext(gvc);
 }

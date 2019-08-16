@@ -1,5 +1,7 @@
-outputs/*.png
-simulation.cconcat
+final.png
+init.png
+out.nut
+
 
 /**/*.log
 # START autotools ignores

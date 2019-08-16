@@ -1,8 +1,11 @@
 #define _GNU_SOURCE //cause stdio.h to include asprintf
 
-#define ONE_FRAME_EVERY 10 // Distance between saved images
-#define TIME_CONTRACTION 1000 // a time unit of 1 corresponds to 1/TIME_CONTRACTION seconds
+#define ONE_FRAME_EVERY 1 // Distance between saved images
+#define MAX_WIDTH 5
+#define MAX_HEIGHT 5
+#define MAX_DPI 200
 
+#define FRAME_RATE 50 // increase the frame rate to decrease the effective length
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h> // malloc and free for file handling
@@ -57,8 +60,6 @@ void glauber_dynamics(graph *init_state,
         pcg32_srandom_r(&update_rng, seeds3[0], seeds3[1]);
         /* end RNG initialization */
 
-        FILE *fp=fopen("simulation.cconcat", "w");
-        fprintf(fp, "ffconcat version 1.0\n");
         double prev_frame = 0; // when the previous frame was drawn
         while (t < threshold_time){
                 double cur_time = exponential_rand((double) init_state->n);
@@ -73,22 +74,37 @@ void glauber_dynamics(graph *init_state,
                 graph_update(init_state, chosen_vertex_index, &update_rng);
 
                 if (t-prev_frame>ONE_FRAME_EVERY){
-                        char *output_fname;
-                        asprintf(&output_fname, "outputs/%f.png", t);
-                        fprintf(fp, "file %s\nduration %f\n", output_fname,
-                                (t-prev_frame)/TIME_CONTRACTION);
-                        draw_torus2png(init_state, 10, 2, output_fname);
-                        free(output_fname);
+                        /* char *output_fname; */
+                        /* asprintf(&output_fname, "outputs/%f.png", t); */
+                        /* fprintf(fp, "file %s\nduration %f\n", output_fname, */
+                        /*         (t-prev_frame)/TIME_CONTRACTION); */
+                        draw_torus2png(init_state, 10, 2,
+                                       round((t-prev_frame)),
+                                       MAX_WIDTH,
+                                       MAX_HEIGHT,
+                                       MAX_DPI,
+                                       NULL);
+                        /* free(output_fname); */
                         prev_frame=t;
                 }
         }
-        fclose(fp);
 
 }
 
 int main(){
         graph *torus = graph_construct_torus(10, 2, 1);
+
+        glauber_dynamics(torus, polya_update, 10);
+
+        FILE *init_state = fopen("init.png", "w");
+        draw_torus2png(torus, 10, 2, 1, MAX_WIDTH, MAX_HEIGHT, MAX_DPI, init_state);
+        fclose(init_state);
+
         glauber_dynamics(torus, polya_update, 10000);
-        draw_torus2png(torus, 10, 2, "out.png");
+
+        FILE *final_state = fopen("final.png", "w");
+        draw_torus2png(torus, 10, 2, 1, MAX_WIDTH, MAX_HEIGHT, MAX_DPI, final_state);
+        fclose(final_state);
+
         graph_free(torus);
 }
