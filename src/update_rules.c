@@ -5,8 +5,7 @@
 #include "update_rules.h"
 
 /* See paper Yannick Couzinie and Christian Hirsch */
-#define ALPHA 0.5
-void static polya_update_func(graph *state, int vertex_index,
+void static polya_update_func(graph *state, int vertex_index, double alpha,
                               pcg32_random_t *rng){
         g_assert(vertex_index < state->n);
 
@@ -22,12 +21,12 @@ void static polya_update_func(graph *state, int vertex_index,
         double scaled_local_weight = 0;
         /* calculate the normalization constant once for the vertex */
         for (int i=0; i < chosen_vertex->dim; i++){
-                scaled_local_weight += pow(chosen_vertex->edges[i]->weight, ALPHA);
+                scaled_local_weight += pow(chosen_vertex->edges[i]->weight, alpha);
         }
 
         for (int i=0; i < chosen_vertex->dim; i++){
                 edge *cur_edge = chosen_vertex->edges[i];
-                double normal_weight = pow(cur_edge->weight, ALPHA)/scaled_local_weight;
+                double normal_weight = pow(cur_edge->weight, alpha)/scaled_local_weight;
                 if (weight_sum < unif_dbl && (weight_sum + normal_weight) > unif_dbl){
                         /* this edge is chosen so increment its weights */
                         cur_edge->weight++;

@@ -1,14 +1,10 @@
 #define _GNU_SOURCE //cause stdio.h to include asprintf
 
-#define ONE_FRAME_EVERY 1 // Distance between saved images
-#define MAX_WIDTH 5
-#define MAX_HEIGHT 5
-#define MAX_DPI 200
-
-#define FRAME_RATE 50 // increase the frame rate to decrease the effective length
+#include <argp.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h> // malloc and free for file handling
+#include <string.h> //strcmp
 
 /* random number generator implementation */
 #include "pcg_variants.h"
@@ -47,7 +43,8 @@ static double exponential_rand(double lambda_rate){
  */
 void glauber_dynamics(graph *init_state,
                       update_rule graph_update,
-                      int threshold_time){
+                      int threshold_time,
+					  arguments *args){
         double t = 0; /* time parameter */
 
         /* start RNG initialization */
@@ -71,39 +68,151 @@ void glauber_dynamics(graph *init_state,
                                                               init_state->n);
 
                 /* use the passed graph_update rule to update the graph state */
-                graph_update(init_state, chosen_vertex_index, &update_rng);
+                graph_update(init_state, chosen_vertex_index, args->alpha,
+							 &update_rng);
 
-                if (t-prev_frame>ONE_FRAME_EVERY){
-                        /* char *output_fname; */
-                        /* asprintf(&output_fname, "outputs/%f.png", t); */
-                        /* fprintf(fp, "file %s\nduration %f\n", output_fname, */
-                        /*         (t-prev_frame)/TIME_CONTRACTION); */
-                        draw_torus2png(init_state, 10, 2,
-                                       round((t-prev_frame)),
-                                       MAX_WIDTH,
-                                       MAX_HEIGHT,
-                                       MAX_DPI,
-                                       NULL);
-                        /* free(output_fname); */
+                if (!args->silent && t-prev_frame>args->frame_density){
+						draw_torus2png(init_state, args->n, args->d, round((t-prev_frame)),
+									   NULL, args->width, args->height, args->dpi,
+									   args->penwidth, args->decrease_rate);
                         prev_frame=t;
                 }
         }
 
 }
 
-int main(){
-        graph *torus = graph_construct_torus(10, 2, 1);
+/** begin initial argument parsing code **/
+const char *argp_program_version = "glauber_dynamics 0.9";
+const char *argp_program_bug_address = "yannick.couzinie@uniroma3.it";
 
-        glauber_dynamics(torus, polya_update, 10);
+/* Program documentation. */
+static char doc[] =
+  "General simulation code which simulates Poisson point process clocks "\
+  "put on vertices which, when ringing, perform a certain update which can "\
+  "easily be adapted by writing a custom update rule. Graphs are output using "\
+  "graphviz and the code naturally facilitates piping into ffmpeg for rendering "\
+  "videos.";
 
-        FILE *init_state = fopen("init.png", "w");
-        draw_torus2png(torus, 10, 2, 1, MAX_WIDTH, MAX_HEIGHT, MAX_DPI, init_state);
-        fclose(init_state);
+static struct argp_option options[] = {
+		  {"alpha",			'a',	"double",	0,					"Set the alpha parameter for the update rules. The default is 0.5."},
+		  {"num",			'n',	"int",		0,						"Set the number of vertices per dimension (i.e. on torus we have n^d vertices). "\
+							      										"The default is 10."},	
+		  {"dim",			'd',	"int",		0,						"Set the dimension of the lattice. The default is 2."},
+		  {"max-time",		'm',	"int",		0,						"Maximum time to run the simulation for. The default is 10000."},
+          {"quiet",			'q',	0, 			0,					 	"Do not output video frames to stdout." },
+		  {"silent", 		's',	0,			OPTION_ALIAS},
+		  {"init-frame", 	'i',	"FILENAME",	OPTION_ARG_OPTIONAL,	"Save a frame of the system state after 10 time steps in init.png "\
+						         										"or in FILENAME.png if supplied."},
+          {"output",		'o', 	"FILENAME", 0,  					"Output the final state to FILENAME.png instead of final.png." },
+		  {"width",			'w',	"int",		0, 						"Set the max width for the frames in inches (graphviz option). The default is 5."},
+		  {"height",		'h',	"int",		0, 						"Set the max height for the frames in inches (graphviz option). The default is 5."},
+		  {"dpi",			'r',	"int",		0, 						"Set the max dpi (dots per inch, i.e. resolution) for the frames (graphviz option). "\
+							    				   						"The default is 200."},
+		  {"frame-density",	'f',	"int",		0, 						"Save a frame only every frame-density time units. Serves as coarse graining to reduce "\
+							    				   						"output video size. The default is 1 (i.e. approximately every full time unit a frame is saved)."},
+		  {"max-penwidth",	'p',	"int",		0, 						"Maximum penwidth used to draw the highest weighted edge (graphviz option). The default is 1."},
+		  {"decrease-rate",	'e',	"int",		0, 						"Exponent to choose penwidth for edge calculated by max-penwidth*(edge-weight/max-weight)^decrease-rate. " \
+												   						"Serves to emphasize small differences between edge weight when they might not be apparent. The default is 1."},
+                  { 0 }
+};
 
-        glauber_dynamics(torus, polya_update, 10000);
+/* Parse a single option. */
+static error_t
+parse_opt (int key, char *arg, struct argp_state *state)
+{
+        /* Get the input argument from argp_parse, which we
+         * know is a pointer to our arguments structure. */
+        struct arguments *args = state->input;
 
-        FILE *final_state = fopen("final.png", "w");
-        draw_torus2png(torus, 10, 2, 1, MAX_WIDTH, MAX_HEIGHT, MAX_DPI, final_state);
+		switch (key){
+				case 'q': case 's':
+				  		args->silent = 1;
+						break;
+				case 'a':
+						args->alpha = strtod(arg, NULL);
+						break;
+				case 'n':
+						args->n = (int) strtol(arg, NULL, 10);
+						break;
+				case 'd':
+						args->d = (int) strtol(arg, NULL, 10);
+						break;
+				case 'm':
+						args->max_time = (int) strtol(arg, NULL, 10);
+						break;
+				case 'i':
+                        args->do_init = 1;
+						args->init_fname = arg;
+						break;
+				case 'o':
+				  		args->output = arg;
+						break;
+				case 'w':
+						args->width = (int) strtol(arg, NULL, 10);
+						break;
+				case 'h':
+						args->height = (int) strtol(arg, NULL, 10);
+						break;
+				case 'r':
+						args->dpi = (int) strtol(arg, NULL, 10);
+						break;
+				case 'f':
+						args->frame_density = (int) strtol(arg, NULL, 10);
+						break;
+				case 'p':
+						args->penwidth = (int) strtol(arg, NULL, 10);
+						break;
+				case 'e':
+						args->decrease_rate = (int) strtol(arg, NULL, 10);
+						break;
+
+				default:
+						return ARGP_ERR_UNKNOWN;
+				}
+				return 0;
+		}
+
+static struct argp argp = { options, parse_opt, NULL, doc };
+
+int main(int argc, char **argv){
+		arguments args;
+        args.silent=0;
+		args.init_fname="DO NOT INIT";
+        args.do_init=0;
+		args.output="final.png";
+		args.alpha=0.5;
+		args.n=10;
+		args.d=2;
+		args.max_time=10000;
+		args.width=5;
+		args.height=5;
+		args.dpi=200;
+		args.frame_density=1;
+		args.penwidth=1;
+		args.decrease_rate=10;
+
+		argp_parse (&argp, argc, argv, 0, 0, &args);
+
+        graph *torus = graph_construct_torus(args.n, args.d, 1);
+
+		if (args.do_init){
+				glauber_dynamics(torus, polya_update, 10, &args);
+				if (args.init_fname == NULL){
+						args.init_fname = "init.png";
+				}
+				FILE *init_state = fopen(args.init_fname, "w");
+				draw_torus2png(torus, args.n, args.d, 1, init_state,
+							   args.width, args.height, args.dpi,
+							   args.penwidth, args.decrease_rate);
+				fclose(init_state);
+		}
+				
+        glauber_dynamics(torus, polya_update, args.max_time-10, &args);
+
+        FILE *final_state = fopen(args.output, "w");
+		draw_torus2png(torus, args.n, args.d, 1, final_state,
+					   args.width, args.height, args.dpi,
+					   args.penwidth, args.decrease_rate);
         fclose(final_state);
 
         graph_free(torus);
