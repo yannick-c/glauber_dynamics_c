@@ -1,3 +1,5 @@
+/** \file */
+
 /* define the edge struct */
 typedef struct edge {
         int v1;                /* one end of edge */
