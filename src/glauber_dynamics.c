@@ -116,29 +116,52 @@ static struct argp_option options[] = {
                   { 0 }
 };
 
+/* use that the strto functions return the remaining string part after parsing
+ * and check that that part is empty otherwise return error messages. Only to
+ * be used inside parse_opt */
+void static check_input(char *remaining_str, char *error_msg, struct argp_state *state){
+        /* use that non-empty strings have length >0 and are thus true */
+        if (strlen(remaining_str)){
+                argp_error(state, error_msg);
+        }
+}
+
 /* Parse a single option. */
-static error_t
-parse_opt (int key, char *arg, struct argp_state *state)
+static error_t parse_opt (int key, char *arg, struct argp_state *state)
 {
         /* Get the input argument from argp_parse, which we
          * know is a pointer to our arguments structure. */
         struct arguments *args = state->input;
+
+        char *remaining_str; /* use this to check the input */
 
 		switch (key){
 				case 'q': case 's':
 				  		args->silent = 1;
 						break;
 				case 'a':
-						args->alpha = strtod(arg, NULL);
+						args->alpha = strtod(arg, &remaining_str);
+                        check_input(remaining_str,
+                                    "False input for alpha (a), only input doubles. Example: -a 0.5.",
+                                    state);
 						break;
 				case 'n':
-						args->n = (int) strtol(arg, NULL, 10);
+						args->n = (int) strtol(arg, &remaining_str, 10);
+                        check_input(remaining_str,
+                                    "False input for num (n), only input integers. Example: -n 10.",
+                                    state);
 						break;
 				case 'd':
-						args->d = (int) strtol(arg, NULL, 10);
+						args->d = (int) strtol(arg, &remaining_str, 10);
+                        check_input(remaining_str,
+                                    "False input for dim (d), only input integers. Example: -d 2.",
+                                    state);
 						break;
 				case 'm':
-						args->max_time = (int) strtol(arg, NULL, 10);
+						args->max_time = (int) strtol(arg, &remaining_str, 10);
+                        check_input(remaining_str,
+                                    "False input for max_time (m), only input integers. Example: -m 10000.",
+                                    state);
 						break;
 				case 'i':
                         args->do_init = 1;
@@ -148,22 +171,40 @@ parse_opt (int key, char *arg, struct argp_state *state)
 				  		args->output = arg;
 						break;
 				case 'w':
-						args->width = (int) strtol(arg, NULL, 10);
+						args->width = (int) strtol(arg, &remaining_str, 10);
+                        check_input(remaining_str,
+                                    "False input for width (w), only input integers. Example: -w 5.",
+                                    state);
 						break;
 				case 'h':
-						args->height = (int) strtol(arg, NULL, 10);
+						args->height = (int) strtol(arg, &remaining_str, 10);
+                        check_input(remaining_str,
+                                    "False input for height (h), only input integers. Example: -h 5.",
+                                    state);
 						break;
 				case 'r':
-						args->dpi = (int) strtol(arg, NULL, 10);
+						args->dpi = (int) strtol(arg, &remaining_str, 10);
+                        check_input(remaining_str,
+                                    "False input for dpi (r), only input integers. Example: -r 200.",
+                                    state);
 						break;
 				case 'f':
-						args->frame_density = (int) strtol(arg, NULL, 10);
+						args->frame_density = (int) strtol(arg, &remaining_str, 10);
+                        check_input(remaining_str,
+                                    "False input for frame-density (f), only input integers. Example: -f 1.",
+                                    state);
 						break;
 				case 'p':
-						args->penwidth = (int) strtol(arg, NULL, 10);
+						args->penwidth = (int) strtol(arg, &remaining_str, 10);
+                        check_input(remaining_str,
+                                    "False input for penwidth (p), only input integers. Example: -p 1.",
+                                    state);
 						break;
 				case 'e':
-						args->decrease_rate = (int) strtol(arg, NULL, 10);
+						args->decrease_rate = (int) strtol(arg, &remaining_str, 10);
+                        check_input(remaining_str,
+                                    "False input for decrease-rate (e), only input integers. Example: -e 10.",
+                                    state);
 						break;
 
 				default:
