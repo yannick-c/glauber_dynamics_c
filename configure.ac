@@ -20,7 +20,8 @@ AC_PROG_INSTALL
 # Checks for libraries.
 AC_CHECK_LIB([m], [ldexp])
 AC_CHECK_LIB([pcg_random], [pcg32_srandom_r])
-AC_CHECK_LIB([glib-2.0])
+AC_CHECK_LIB([glib-2.0], [g_assert])
+AC_CHECK_LIB([gvc], [gvRender])
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h inttypes.h stddef.h stdint.h stdlib.h string.h])
