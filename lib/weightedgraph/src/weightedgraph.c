@@ -79,21 +79,6 @@ void graph_add_edge(graph *g, int v1, int v2, int weight){
         g->m++;
 }
 
-/**
- * utility function to find edge connecting v to vertex with label dst
- *
- * Returns NULL pointer if no edge present.
- **/
-edge *graph_find_connecting_edge(vertex *v, int dst){
-        for (int i=0; i<v->dim; i++){
-                if (v->edges[i]->v1 == dst ||
-                    v->edges[i]->v2 == dst){
-                        return v->edges[i];
-                }
-        }
-        return NULL;
-}
-
 void graph_rm_edge(graph *g, int v1, int v2){
         /* check that the vertices are possible for the graph */
         g_assert(v1 < g->n);
@@ -104,7 +89,7 @@ void graph_rm_edge(graph *g, int v1, int v2){
          * new edge instance, but need to loop through the edges and find the
          * actual edge.
          **/
-        edge *connecting_edge = graph_find_connecting_edge(g->vertices[v1], v2); 
+        edge *connecting_edge = vertex_find_connecting_edge(g->vertices[v1], v2); 
         if (connecting_edge){
                 /* only if the connecting edge is not NULL */
                 vertex_rm_edge_from_neighbourhood(g->vertices[v1], connecting_edge);
@@ -205,14 +190,14 @@ void draw_torus2png(graph *draw_torus, int n, int d, unsigned int duration,
         /* Do the horizontal connections */ 
         for (int i=0; i < n; i++){
 
-                edge *looping_edge = graph_find_connecting_edge(draw_torus->vertices[n*i], n*i+n-1);
+                edge *looping_edge = vertex_find_connecting_edge(draw_torus->vertices[n*i], n*i+n-1);
                 double looping_weight_ratio=penwidth*pow(looping_edge->weight/max_weight, decrease_rate);
                 ConcatStr(graph_gv_str, "%sH%i -- %i[penwidth=%f];\n", n*i, n*i, looping_weight_ratio);
 
                 for (int j=1; j < n; j++){
                         int cur_vertex_index = n*i+j;
 
-                        edge *connecting_edge = graph_find_connecting_edge(draw_torus->vertices[cur_vertex_index-1],
+                        edge *connecting_edge = vertex_find_connecting_edge(draw_torus->vertices[cur_vertex_index-1],
                                                                            cur_vertex_index);
                         double weight_ratio = penwidth*pow(connecting_edge->weight/max_weight, decrease_rate);
 
@@ -227,7 +212,7 @@ void draw_torus2png(graph *draw_torus, int n, int d, unsigned int duration,
                 asprintf(&same_rank, "V%i, %i", i, i);
                 
                 
-                edge *looping_edge = graph_find_connecting_edge(draw_torus->vertices[i], i+n*(n-1));
+                edge *looping_edge = vertex_find_connecting_edge(draw_torus->vertices[i], i+n*(n-1));
                 double looping_weight_ratio=penwidth*pow(looping_edge->weight/max_weight, decrease_rate);
                 ConcatStr(graph_gv_str, "%sV%i -- %i[penwidth=%f];\n", i, i, looping_weight_ratio);
 
@@ -235,7 +220,7 @@ void draw_torus2png(graph *draw_torus, int n, int d, unsigned int duration,
                         int prev_vertex_index=i+n*(j-1);
                         int cur_vertex_index=i+n*j;
 
-                        edge *connecting_edge = graph_find_connecting_edge(draw_torus->vertices[prev_vertex_index],
+                        edge *connecting_edge = vertex_find_connecting_edge(draw_torus->vertices[prev_vertex_index],
                                                                            cur_vertex_index);
 
                         double weight_ratio = penwidth*pow(connecting_edge->weight/max_weight, decrease_rate);

@@ -73,3 +73,13 @@ void vertex_rm_edge_from_neighbourhood(vertex *v, edge *e){
                 }
         }
 }
+
+edge *vertex_find_connecting_edge(vertex *v, int dst){
+        for (int i=0; i<v->dim; i++){
+                if (v->edges[i]->v1 == dst ||
+                    v->edges[i]->v2 == dst){
+                        return v->edges[i];
+                }
+        }
+        return NULL;
+}

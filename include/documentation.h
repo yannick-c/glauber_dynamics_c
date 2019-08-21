@@ -1,4 +1,6 @@
-/** \file */
+/** \file documentation.h
+ * \brief Contains the mainpage of the documentation. */
+
 /** \mainpage Glauber Dynamics simulator in C
  * 
  * \section Introduction
@@ -18,8 +20,10 @@
  *
  * Change directories into the download location of this library. Download the
  * [the C library of the PCG Pseudo Random Number Generator
- * family](http://www.pcg-random.org/), unpack it into the lib subdirectory
- * (resulting in a `lib/pcg-c` directory) and run `make` in it. Alternatively,
+ * family](http://www.pcg-random.org/)
+ * ([click me for download](http://www.pcg-random.org/downloads/pcg-c-0.94.zip),
+ * unpack it into the lib subdirectory (resulting in a `lib/pcg-c` directory)
+ * and run `make` in it. Alternatively,
  * change `PCG_DIR` in `Makefile.am` if you have already compiled this random
  * number generator somewhere else. In this case you have to run `autoreconf
  * -i` again which might install some extra files but ensures that your new
@@ -71,14 +75,18 @@
  * \subsection conribute Adapt code to personal use case and contributing
  *
  * This code was written with the possibilty for future extension in mind. To
- * use different update rules or write your own consult \ref updaterules about
+ * use different update rules or write your own consult \ref update_rules.h about
  * details. Extending the available graphs is currently not as straightforward
  * but not impossible. All graph related stuff has been isolated into the
- * `weightegraph` lib (cf. \ref weightedgraph).
+ * `weightedgraph` lib (cf. \ref weightedgraph.h).
  *
  * Contributions are always welcome but it is important that tests are added
- * using the glib testing harness (for examples see \ref testing) and the
- * entries in `Makefile.am` should be changed accordingly so that `make check`
- * includes the new tests after the usual `autoreconf`. All code here should be
- * in `C11`. If all these conditions are met a pull request is more than welcome.
+ * using the glib testing harness (for examples see for example
+ * \ref test_weightedgraph.c.
+ * and
+ * [the documentation of glib testing](https://developer.gnome.org/glib/stable/glib-Testing.html))
+ * and the entries in `Makefile.am` should be changed
+ * accordingly so that `make check` includes the new tests after the usual
+ * `autoreconf`. All code here should be in `C11`. If all these conditions are
+ * met a pull request is more than welcome.
  **/
