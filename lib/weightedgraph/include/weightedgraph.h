@@ -115,6 +115,9 @@ graph *graph_construct_torus(int n, int d, int init_weight);
  * \todo Separate the string generation and png rendering to make the png
  * rendering reusable by other graphviz string generating drawing functions.
  *  
+ * \todo Understand graphviz library better and avoid the string generation
+ * step alltogether and directly build the graph itself.
+ *
  * \todo Find a more elegant solution to the duration parameter than just
  * rendering the same frame duration amount of times. Ideally a way that allows
  * for double duration (i.e. generate one frame and assign it a duration on

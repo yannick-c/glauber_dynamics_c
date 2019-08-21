@@ -172,7 +172,7 @@ void draw_torus2png(graph *draw_torus, int n, int d, unsigned int duration,
         asprintf(&graph_gv_str, "graph {\n");
         ConcatStr(graph_gv_str, "%ssize=\"%i,%i\";\ndpi=%i;\n",
                   max_width, max_height, max_dpi);
-        ConcatStr(graph_gv_str, "%snode [shape=point, style=dot, width=.1, height=.1, label=None];\n");
+        ConcatStr(graph_gv_str, "%snode [shape=point, style=dot, width=.1, height=.1];\n");
         ConcatStr(graph_gv_str, "%srankdir=LR;\n");
         /* find all the horizontal vertices that are invisible and serve as
          * docking points for edges to 'loop' around to the other end (i.e.
@@ -234,17 +234,19 @@ void draw_torus2png(graph *draw_torus, int n, int d, unsigned int duration,
                 free(same_rank);
         }
         ConcatStr(graph_gv_str, "%s}");
+        printf("%s\n", graph_gv_str);
         
         /** BEGIN GRAPHVIZ CONVERSION **/
-        GVC_t *gvc;
         Agraph_t *g = agmemread(graph_gv_str); /* read the graph from memory */
-        gvc = gvContext();
+        GVC_t *gvc = gvContext();
 
         gvLayout(gvc, g, "dot"); /* layout the gv file using dot */
 
         for (int i=0; i<duration; i++){
                 gvRender(gvc, g, "png", out_stream); /* and convert it to png */
         }
+        free(graph_gv_str);
         gvFreeLayout(gvc, g);
+        agclose(g);
         gvFreeContext(gvc);
 }

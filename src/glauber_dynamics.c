@@ -145,6 +145,13 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state)
                                     "False input for alpha (a), only input doubles. Example: -a 0.5.",
                                     state);
 						break;
+				case 'f':
+						args->frame_density = strtod(arg, &remaining_str);
+                        check_input(remaining_str,
+                                    "False input for frame-density (f), only doubles. "
+                                    "Example: -f 1.",
+                                    state);
+						break;
 				case 'n':
 						args->n = (int) strtol(arg, &remaining_str, 10);
                         check_input(remaining_str,
@@ -188,12 +195,6 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state)
                                     "False input for dpi (r), only input integers. Example: -r 200.",
                                     state);
 						break;
-				case 'f':
-						args->frame_density = (int) strtol(arg, &remaining_str, 10);
-                        check_input(remaining_str,
-                                    "False input for frame-density (f), only input integers. Example: -f 1.",
-                                    state);
-						break;
 				case 'p':
 						args->penwidth = (int) strtol(arg, &remaining_str, 10);
                         check_input(remaining_str,
@@ -228,7 +229,7 @@ int main(int argc, char **argv){
 		args.width=5;
 		args.height=5;
 		args.dpi=200;
-		args.frame_density=1;
+		args.frame_density=1.0;
 		args.penwidth=1;
 		args.decrease_rate=10;
 
