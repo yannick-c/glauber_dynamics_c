@@ -107,8 +107,8 @@ graph *graph_construct_torus(int n, int d, int init_weight);
  * \param max_dpi corresponds to the dpi (i.e. resolution) in the graphviz
  * image.
  * \param penwidth Is the maximum penwidth in the graphviz image for the edges.
- * \param decrease_rate This is the decrease rate (see \ref draw_torus2png description)
- * for the penwidth.
+ * \param passed_time The parameter by which to divide the weights (i.e. the
+ * time passed until now).
  *
  * \todo Add a drawing function for values d other than 2.
  *  
@@ -126,4 +126,4 @@ graph *graph_construct_torus(int n, int d, int init_weight);
  */
 void draw_torus2png(graph *draw_torus, int n, int d, unsigned int duration,
                     FILE *out_stream, int max_width, int max_height, int max_dpi,
-                    int penwidth, int decrease_rate);
+                    int penwidth, double passed_time);

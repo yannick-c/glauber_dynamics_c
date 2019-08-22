@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ([2.69])
-AC_INIT([glauber_dynamics], [0.9], [yannick.couzinie@uniroma3.it])
+AC_INIT([glauber_dynamics], [1.0], [yannick.couzinie@uniroma3.it])
 AC_CONFIG_SRCDIR([src/glauber_dynamics.c])
 AC_CONFIG_HEADERS([config.h])
 

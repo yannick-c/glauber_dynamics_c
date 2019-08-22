@@ -154,7 +154,7 @@ graph *graph_construct_torus(int n, int d, int init_weight){
 /* get a png file as string stream */
 void draw_torus2png(graph *draw_torus, int n, int d, unsigned int duration,
 					FILE *out_stream, int max_width, int max_height, int max_dpi,
-					int penwidth, int decrease_rate){
+					int penwidth, double passed_time){
         /* only d==2 printing case has been handled */
         g_assert(d==2);
 
@@ -191,7 +191,7 @@ void draw_torus2png(graph *draw_torus, int n, int d, unsigned int duration,
         for (int i=0; i < n; i++){
 
                 edge *looping_edge = vertex_find_connecting_edge(draw_torus->vertices[n*i], n*i+n-1);
-                double looping_weight_ratio=penwidth*pow(looping_edge->weight/max_weight, decrease_rate);
+                double looping_weight_ratio=penwidth*looping_edge->weight/passed_time;
                 ConcatStr(graph_gv_str, "%sH%i -- %i[penwidth=%f];\n", n*i, n*i, looping_weight_ratio);
 
                 for (int j=1; j < n; j++){
@@ -199,7 +199,7 @@ void draw_torus2png(graph *draw_torus, int n, int d, unsigned int duration,
 
                         edge *connecting_edge = vertex_find_connecting_edge(draw_torus->vertices[cur_vertex_index-1],
                                                                            cur_vertex_index);
-                        double weight_ratio = penwidth*pow(connecting_edge->weight/max_weight, decrease_rate);
+                        double weight_ratio = penwidth*connecting_edge->weight/passed_time;
 
                         ConcatStr(graph_gv_str, "%s%i -- %i[penwidth=%f];\n", cur_vertex_index-1, cur_vertex_index, weight_ratio);
                 }
@@ -213,7 +213,7 @@ void draw_torus2png(graph *draw_torus, int n, int d, unsigned int duration,
                 
                 
                 edge *looping_edge = vertex_find_connecting_edge(draw_torus->vertices[i], i+n*(n-1));
-                double looping_weight_ratio=penwidth*pow(looping_edge->weight/max_weight, decrease_rate);
+                double looping_weight_ratio=penwidth*looping_edge->weight/passed_time;
                 ConcatStr(graph_gv_str, "%sV%i -- %i[penwidth=%f];\n", i, i, looping_weight_ratio);
 
                 for (int j=1; j < n; j++){
@@ -223,7 +223,7 @@ void draw_torus2png(graph *draw_torus, int n, int d, unsigned int duration,
                         edge *connecting_edge = vertex_find_connecting_edge(draw_torus->vertices[prev_vertex_index],
                                                                            cur_vertex_index);
 
-                        double weight_ratio = penwidth*pow(connecting_edge->weight/max_weight, decrease_rate);
+                        double weight_ratio = penwidth*connecting_edge->weight/passed_time;
 
                         ConcatStr(graph_gv_str, "%s%i -- %i[penwidth=%f];\n", prev_vertex_index, cur_vertex_index, weight_ratio);
                         ConcatStr(same_rank, "%s, %i", cur_vertex_index);
@@ -234,7 +234,6 @@ void draw_torus2png(graph *draw_torus, int n, int d, unsigned int duration,
                 free(same_rank);
         }
         ConcatStr(graph_gv_str, "%s}");
-        printf("%s\n", graph_gv_str);
         
         /** BEGIN GRAPHVIZ CONVERSION **/
         Agraph_t *g = agmemread(graph_gv_str); /* read the graph from memory */

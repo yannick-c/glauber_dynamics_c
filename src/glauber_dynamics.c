@@ -59,7 +59,7 @@ void glauber_dynamics(graph *init_state,
 
         double prev_frame = 0; // when the previous frame was drawn
         while (t < threshold_time){
-                double cur_time = exponential_rand((double) init_state->n);
+                double cur_time = exponential_rand((double) args->n);
                 t += cur_time;
 
                 /* it generates strictly smaller than bound so init_state->n is
@@ -74,7 +74,7 @@ void glauber_dynamics(graph *init_state,
                 if (!args->silent && t-prev_frame>args->frame_density){
 						draw_torus2png(init_state, args->n, args->d, round((t-prev_frame)),
 									   NULL, args->width, args->height, args->dpi,
-									   args->penwidth, args->decrease_rate);
+									   args->penwidth, t);
                         prev_frame=t;
                 }
         }
@@ -110,9 +110,7 @@ static struct argp_option options[] = {
 							    				   						"The default is 200."},
 		  {"frame-density",	'f',	"int",		0, 						"Save a frame only every frame-density time units. Serves as coarse graining to reduce "\
 							    				   						"output video size. The default is 1 (i.e. approximately every full time unit a frame is saved)."},
-		  {"max-penwidth",	'p',	"int",		0, 						"Maximum penwidth used to draw the highest weighted edge (graphviz option). The default is 1."},
-		  {"decrease-rate",	'e',	"int",		0, 						"Exponent to choose penwidth for edge calculated by max-penwidth*(edge-weight/max-weight)^decrease-rate. " \
-												   						"Serves to emphasize small differences between edge weight when they might not be apparent. The default is 1."},
+		  {"max-penwidth",	'p',	"int",		0, 						"Maximum penwidth used to draw the highest weighted edge (graphviz option). The default is 10."},
                   { 0 }
 };
 
@@ -201,13 +199,6 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state)
                                     "False input for penwidth (p), only input integers. Example: -p 1.",
                                     state);
 						break;
-				case 'e':
-						args->decrease_rate = (int) strtol(arg, &remaining_str, 10);
-                        check_input(remaining_str,
-                                    "False input for decrease-rate (e), only input integers. Example: -e 10.",
-                                    state);
-						break;
-
 				default:
 						return ARGP_ERR_UNKNOWN;
 				}
@@ -230,8 +221,7 @@ int main(int argc, char **argv){
 		args.height=5;
 		args.dpi=200;
 		args.frame_density=1.0;
-		args.penwidth=1;
-		args.decrease_rate=10;
+		args.penwidth=10;
 
 		argp_parse (&argp, argc, argv, 0, 0, &args);
 
@@ -245,7 +235,7 @@ int main(int argc, char **argv){
 				FILE *init_state = fopen(args.init_fname, "w");
 				draw_torus2png(torus, args.n, args.d, 1, init_state,
 							   args.width, args.height, args.dpi,
-							   args.penwidth, args.decrease_rate);
+							   args.penwidth, 10);
 				fclose(init_state);
 		}
 				
@@ -254,7 +244,7 @@ int main(int argc, char **argv){
         FILE *final_state = fopen(args.output, "w");
 		draw_torus2png(torus, args.n, args.d, 1, final_state,
 					   args.width, args.height, args.dpi,
-					   args.penwidth, args.decrease_rate);
+					   args.penwidth, args.max_time);
         fclose(final_state);
 
         graph_free(torus);

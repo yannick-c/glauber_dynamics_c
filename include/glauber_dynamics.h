@@ -27,8 +27,7 @@ typedef struct arguments {
     int width; /**< \brief Default: 5. */
     int height; /**< \brief Default: 5. */
     int dpi; /**< \brief Default: 200. */
-    int penwidth; /**< \brief Default: 1. */
-    int decrease_rate; /**< \brief Default: 10. */
+    int penwidth; /**< \brief Default: 10. */
     double alpha; /**< \brief Default: 0.5. */
     double frame_density; /**< \brief Default: 1. */
 
