@@ -18,13 +18,14 @@ Linux).
    and extract it into the lib folder such that `pcg-c` is a subdirectory of
    `lib` (Note: Do not download the minimal version).
 3. Run `./configure && make` in the `pcg-c` folder.
-4. Run `./configure && make` in the main directory of this repository.
+4. Run `./configure && make` in the main directory of this repository. If this
+   fails make sure you have `autotools` installed.
 
 There should be a runnable `glauber_dynamics` in the main directory of this
 library now. To see how to run it run
 
 ```
-        ./glauber_dynamics --help
+     ./glauber_dynamics --help
 ```
 
 As a quick reference the three main commands are

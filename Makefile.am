@@ -1,6 +1,5 @@
 ### GENERAL FLAGS
 AM_CFLAGS=-I./include -I$(PCG_DIR)/include -I$(PCG_DIR)/extras -I$(WEIGHTEDGRAPH_DIR)/include `pkg-config --cflags glib-2.0 libgvc` -g -O0 -Wall # -fprofile-arcs -ftest-coverage
-ACLOCAL_AMFLAGS = '-I m4'
 AM_LDFLAGS=-lm `pkg-config --libs glib-2.0 libgvc` # include math with -lm
 AUTOMAKE_OPTIONS = foreign # this allows you to not have README (since we have README.md)
 

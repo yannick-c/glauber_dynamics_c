@@ -10,9 +10,6 @@ AM_INIT_AUTOMAKE([subdir-objects])
 LT_INIT([])
 CFLAGS+=" -std=c11"
 
-# This is recommended by autoreconf -i
-AC_CONFIG_MACRO_DIRS([m4])
-
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_INSTALL
