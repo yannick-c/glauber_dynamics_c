@@ -1,17 +1,17 @@
 ### GENERAL FLAGS
-AM_CFLAGS=-I./include -I$(PCG_DIR)/include -I$(PCG_DIR)/extras -I$(WEIGHTEDGRAPH_DIR)/include `pkg-config --cflags glib-2.0 libgvc` -g -O0 -Wall # -fprofile-arcs -ftest-coverage
-AM_LDFLAGS=-lm `pkg-config --libs glib-2.0 libgvc` # include math with -lm
+AM_CFLAGS=-I./include -Ilib/pcg-c/include -Ilib/pcg-c/extras -Ilib/weightedgraph/include ${libglib_CFLAGS} ${libgvc_CFLAGS} -g -O0 -Wall # -fprofile-arcs -ftest-coverage
+LDADD=-lm # include math with -lm
 AUTOMAKE_OPTIONS = foreign # this allows you to not have README (since we have README.md)
 
 ### START WEIGHTEDGRAPHS LIB
 lib_LIBRARIES=lib/weightedgraph/libweightedgraph.a
-lib_weightedgraph_libweightedgraph_a_SOURCES=$(WEIGHTEDGRAPH_DIR)/src/weightedgraph.c $(WEIGHTEDGRAPH_DIR)/src/vertex.c $(WEIGHTEDGRAPH_DIR)/src/edge.c
+lib_weightedgraph_libweightedgraph_a_SOURCES=lib/weightedgraph/src/weightedgraph.c lib/weightedgraph/src/vertex.c lib/weightedgraph/src/edge.c
 ### END WEIGHTEDGRAPHS LIB
 
 ### START LOCAL SRC
 bin_PROGRAMS=glauber_dynamics
-glauber_dynamics_SOURCES=./src/glauber_dynamics.c ./src/update_rules.c $(PCG_DIR)/extras/entropy.c
-glauber_dynamics_LDADD=$(PCG_DIR)/src/libpcg_random.a $(WEIGHTEDGRAPH_DIR)/libweightedgraph.a
+glauber_dynamics_SOURCES=./src/glauber_dynamics.c ./src/update_rules.c lib/pcg-c/extras/entropy.c
+glauber_dynamics_LDADD=lib/pcg-c/src/libpcg_random.a lib/weightedgraph/libweightedgraph.a ${libglib_LIBS} ${libgvc_LIBS}
 ### END LOCAL SRC
 
 ### START TEST
@@ -19,14 +19,11 @@ TESTS=$(check_PROGRAMS)
 check_PROGRAMS=test/test_update_rules lib/weightedgraph/test/test_vertex lib/weightedgraph/test/test_weightedgraph
 
 test_test_update_rules_SOURCES=test/test_update_rules.c src/update_rules.c
-test_test_update_rules_LDADD=$(WEIGHTEDGRAPH_DIR)/libweightedgraph.a
+test_test_update_rules_LDADD=lib/weightedgraph/libweightedgraph.a ${libglib_LIBS} ${libgvc_LIBS}
 
-lib_weightedgraph_test_test_vertex_SOURCES=$(WEIGHTEDGRAPH_DIR)/test/test_vertex.c $(WEIGHTEDGRAPH_DIR)/src/vertex.c $(WEIGHTEDGRAPH_DIR)/src/edge.c
+lib_weightedgraph_test_test_vertex_SOURCES=lib/weightedgraph/test/test_vertex.c lib/weightedgraph/src/vertex.c lib/weightedgraph/src/edge.c
+lib_weightedgraph_test_test_vertex_LDADD=${libglib_LIBS}
 
-lib_weightedgraph_test_test_weightedgraph_SOURCES=$(WEIGHTEDGRAPH_DIR)/test/test_weightedgraph.c
-lib_weightedgraph_test_test_weightedgraph_LDADD=$(WEIGHTEDGRAPH_DIR)/libweightedgraph.a
+lib_weightedgraph_test_test_weightedgraph_SOURCES=lib/weightedgraph/test/test_weightedgraph.c
+lib_weightedgraph_test_test_weightedgraph_LDADD=lib/weightedgraph/libweightedgraph.a ${libglib_LIBS} ${libgvc_LIBS}
 ### END TEST
-
-### LOCAL DIRS
-PCG_DIR=lib/pcg-c
-WEIGHTEDGRAPH_DIR=lib/weightedgraph
