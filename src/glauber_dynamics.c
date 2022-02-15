@@ -120,7 +120,7 @@ static struct argp_option options[] = {
 void static check_input(char *remaining_str, char *error_msg, struct argp_state *state){
         /* use that non-empty strings have length >0 and are thus true */
         if (strlen(remaining_str)){
-                argp_error(state, error_msg);
+                argp_error(state, "%s", error_msg);
         }
 }
 

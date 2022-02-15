@@ -39,3 +39,6 @@ lib/weightedgraph/libweightedgraph.a
 /**/test_*
 !/**/test/*.c
 /**/.dirstamp
+
+.nvimrc
+.vimrc

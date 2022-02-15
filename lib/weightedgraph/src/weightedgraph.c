@@ -145,10 +145,13 @@ graph *graph_construct_torus(int n, int d, int init_weight){
  * be the first % argument in any case).
  * NOTE: Use ##__VAR_ARGS__ to not include the comma if there are no
  * __VA_ARGS__ given, see gcc docs on variadic macros.*/
-#define ConcatStr(previous_str, main_string_containing_percents, ...){                          \
-        char *tmp=previous_str;                                                                 \
-        asprintf(&previous_str, main_string_containing_percents, previous_str, ##__VA_ARGS__);  \
-        free(tmp);                                                                              \
+#define ConcatStr(previous_str, main_string_containing_percents, ...){                                  \
+        char *tmp=previous_str;                                                                         \
+        if (asprintf(&previous_str, main_string_containing_percents, previous_str, ##__VA_ARGS__)<0){   \
+                perror("Could not concatenate strings, run again with gdb or report bug.");             \
+                abort();                                                                                \
+        }                                                                                               \
+        free(tmp);                                                                                      \
 }
 
 /* get a png file as string stream */
@@ -169,7 +172,10 @@ void draw_torus2png(graph *draw_torus, int n, int d, unsigned int duration,
         }
         char *graph_gv_str; // need to initialize for ConcatStr not to segfault
 
-        asprintf(&graph_gv_str, "graph {\n");
+        if (asprintf(&graph_gv_str, "graph {\n") < 0){
+                perror("Could not allocate string 'graph {\n' to graph_gv_str, check with gdb or report bug.");
+                abort();
+        }
         ConcatStr(graph_gv_str, "%ssize=\"%i,%i\";\ndpi=%i;\n",
                   max_width, max_height, max_dpi);
         ConcatStr(graph_gv_str, "%snode [shape=point, style=dot, width=.1, height=.1];\n");
@@ -209,7 +215,10 @@ void draw_torus2png(graph *draw_torus, int n, int d, unsigned int duration,
         /* Now do the vertical connections and define their ranks as same */ 
         for (int i=0; i < n; i++){
                 char *same_rank;
-                asprintf(&same_rank, "V%i, %i", i, i);
+                if (asprintf(&same_rank, "V%i, %i", i, i)<0){
+                        perror("Could not allocate with asprintf to initialize string same_rank, check with gdb or report bug.");
+                        abort();
+                }
                 
                 
                 edge *looping_edge = vertex_find_connecting_edge(draw_torus->vertices[i], i+n*(n-1));
