@@ -16,10 +16,10 @@
 /** \brief The update_rule function type to which all update rules should
  * adhere.
  *
- * \param graph The input graph to update.
- * \param int The index of the vertex to update (i.e. whose clock 'rang').
- * \param double The intrinsic alpha parameter of the model.
- * \param pcg32_random_t The RNG governing the randomness in the model.
+ * \p graph The input graph to update.
+ * \p int The index of the vertex to update (i.e. whose clock 'rang').
+ * \p double The intrinsic alpha parameter of the model.
+ * \p pcg32_random_t The RNG governing the randomness in the model.
  * \see glauber_dynamics */
 typedef void (*update_rule)(graph*, int, double, pcg32_random_t*);
 
