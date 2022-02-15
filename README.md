@@ -1,8 +1,5 @@
-This library is fully documented using doxygen which can be generated using
-
-        doxygen Doxyfile
-
-and then observed by opening `documentation/html/index.html`. This README
+This library is fully documented using doxygen which is available through
+github pages [here](https://yannick-c.github.io/glauber_dynamics_c/). This README
 contains the necessary information to get the program running (only tested on
 Linux).
 
